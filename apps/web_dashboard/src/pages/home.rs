@@ -1,3 +1,4 @@
+use crate::BASE_PATH;
 use crate::components::ui::navbar::Navbar;
 use crate::components::ui::theme_editor::ThemeEditor;
 use crate::data::csv_loader::{
@@ -34,7 +35,7 @@ pub fn Home() -> impl IntoView {
     // Demo 1: Sine Wave
     let sine_data = RwSignal::new(Dataset::new());
     let _sine_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/sine_wave.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/sine_wave.csv")).await {
             Ok(table) => sine_data.set(to_xy_dataset(&table, "x", "y", "Sine")),
             Err(e) => log::error!("sine_wave.csv: {e}"),
         }
@@ -43,7 +44,7 @@ pub fn Home() -> impl IntoView {
     // Demo 2: Large Dataset (5000 points — LTTB demo)
     let large_data = RwSignal::new(Dataset::new());
     let _large_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/large_dataset.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/large_dataset.csv")).await {
             Ok(table) => large_data.set(to_xy_dataset(&table, "x", "y", "Signal")),
             Err(e) => log::error!("large_dataset.csv: {e}"),
         }
@@ -52,7 +53,7 @@ pub fn Home() -> impl IntoView {
     // Demo 3: Area Chart (multi-series)
     let area_data = RwSignal::new(Dataset::new());
     let _area_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/area_chart.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/area_chart.csv")).await {
             Ok(table) => area_data.set(to_multi_dataset(
                 &table,
                 "x",
@@ -65,7 +66,7 @@ pub fn Home() -> impl IntoView {
     // Demo 4: Scatter Plot
     let scatter_data = RwSignal::new(Dataset::new());
     let _scatter_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/scatter.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/scatter.csv")).await {
             Ok(table) => scatter_data.set(to_xy_dataset(&table, "x", "y", "Correlation")),
             Err(e) => log::error!("scatter.csv: {e}"),
         }
@@ -74,7 +75,7 @@ pub fn Home() -> impl IntoView {
     // Demo 5: Multi-series (sin, cos, tan) — RwSignal needed for visibility toggle
     let multi_data = RwSignal::new(Dataset::new());
     let _multi_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/multi_series.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/multi_series.csv")).await {
             Ok(table) => multi_data.set(to_multi_dataset(
                 &table,
                 "x",
@@ -91,7 +92,7 @@ pub fn Home() -> impl IntoView {
     // Demo 6: Bar Chart (grouped)
     let bar_data = RwSignal::new(BarDataset::default());
     let _bar_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/bar_grouped.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/bar_grouped.csv")).await {
             Ok(table) => bar_data.set(to_grouped_bar(
                 &table,
                 "category",
@@ -108,7 +109,7 @@ pub fn Home() -> impl IntoView {
     // Demo 7: Bar Chart (stacked)
     let stacked_bar_data = RwSignal::new(BarDataset::default());
     let _stacked_bar_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/bar_stacked.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/bar_stacked.csv")).await {
             Ok(table) => stacked_bar_data.set(to_grouped_bar(
                 &table,
                 "month",
@@ -125,7 +126,7 @@ pub fn Home() -> impl IntoView {
     // Demo 8: Pie Chart
     let pie_data = RwSignal::new(vec![]);
     let _pie_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/pie.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/pie.csv")).await {
             Ok(table) => pie_data.set(to_pie_entries(&table, "label", "value")),
             Err(e) => log::error!("pie.csv: {e}"),
         }
@@ -147,7 +148,7 @@ pub fn Home() -> impl IntoView {
     // Demo 10: Box Plot
     let box_data = RwSignal::new(vec![]);
     let _box_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/box_data.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/box_data.csv")).await {
             Ok(table) => box_data.set(to_box_groups(&table, "group", "value")),
             Err(e) => log::error!("box_data.csv: {e}"),
         }
@@ -156,7 +157,7 @@ pub fn Home() -> impl IntoView {
     // Demo 11: Histogram
     let hist_data = RwSignal::new(vec![]);
     let _hist_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/histogram.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/histogram.csv")).await {
             Ok(table) => hist_data.set(to_histogram_values(&table, "value")),
             Err(e) => log::error!("histogram.csv: {e}"),
         }
@@ -165,7 +166,7 @@ pub fn Home() -> impl IntoView {
     // Demo 12: Candlestick
     let candle_data = RwSignal::new(vec![]);
     let _candle_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/candlestick.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/candlestick.csv")).await {
             Ok(table) => {
                 candle_data.set(to_ohlc(&table, "bar", "open", "high", "low", "close"));
             }
@@ -184,7 +185,7 @@ pub fn Home() -> impl IntoView {
     ];
     let radar_data = RwSignal::new(vec![]);
     let _radar_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/radar.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/radar.csv")).await {
             Ok(table) => radar_data.set(to_radar_series(
                 &table,
                 "product",
@@ -204,7 +205,7 @@ pub fn Home() -> impl IntoView {
     // Demo 14: Waterfall
     let waterfall_data = RwSignal::new(vec![]);
     let _waterfall_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/waterfall.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/waterfall.csv")).await {
             Ok(table) => {
                 waterfall_data.set(to_waterfall_bars(&table, "label", "value", "kind"));
             }
@@ -215,7 +216,7 @@ pub fn Home() -> impl IntoView {
     // Demo 15: Violin Chart
     let violin_data = RwSignal::new(vec![]);
     let _violin_res = LocalResource::new(move || async move {
-        match fetch_csv("/data/violin_data.csv").await {
+        match fetch_csv(&format!("{BASE_PATH}/data/violin_data.csv")).await {
             Ok(table) => violin_data.set(to_box_groups(&table, "group", "value")),
             Err(e) => log::error!("violin_data.csv: {e}"),
         }

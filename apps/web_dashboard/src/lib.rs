@@ -8,6 +8,13 @@
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{components::*, path};
+
+/// Base URL path for asset fetches. Empty in dev, "/lodviz-rs" on GitHub Pages.
+pub const BASE_PATH: &str = if cfg!(feature = "gh-pages") {
+    "/lodviz-rs"
+} else {
+    ""
+};
 use lodviz_components::components::layout::global_mouse::provide_global_mouse;
 
 // Core domain logic (public API)
