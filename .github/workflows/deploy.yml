@@ -6,11 +6,20 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,14 +30,13 @@ jobs:
           toolchain: nightly
           targets: wasm32-unknown-unknown
 
-      - name: Cache Trunk
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/bin/trunk
-          key: ${{ runner.os }}-trunk-${{ hashFiles('**/Cargo.toml') }}
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
 
-      - name: Install Trunk
-        run: cargo install trunk --locked --force
+      - name: Install Trunk (pre-built binary)
+        run: |
+          wget -qO- https://github.com/trunk-rs/trunk/releases/download/v0.21.14/trunk-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xzf- -C /usr/local/bin
 
       - name: Install Node.js dependencies
         run: |
@@ -40,11 +48,17 @@ jobs:
           cd apps/web_dashboard
           trunk build --release --config Trunk.ghpages.toml
 
-      - name: Create .nojekyll file
-        run: touch apps/web_dashboard/dist/.nojekyll
+      - name: Copy index.html to 404.html (SPA routing fallback)
+        run: cp apps/web_dashboard/dist/index.html apps/web_dashboard/dist/404.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './apps/web_dashboard/dist'
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./apps/web_dashboard/dist
+        id: deployment
+        uses: actions/deploy-pages@v4
