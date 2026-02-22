@@ -51,7 +51,7 @@ pub fn App() -> impl IntoView {
         <Meta charset="UTF-8" />
         <Meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <Router>
+        <Router base=if cfg!(feature = "gh-pages") { "/lodviz-rs" } else { "" }>
             <Routes fallback=|| view! { <div>"404 — Not Found"</div> }>
                 <Route path=path!("/") view=Home />
             </Routes>

@@ -16,6 +16,9 @@ gloo-net = { version = "0.6", features = ["http"] }
 lodviz_core = { path = "../../crates/lodviz_core" }
 lodviz_components = { version = "0.1.0", path = "../../crates/lodviz_components" }
 
+[features]
+gh-pages = []
+
 [dev-dependencies]
 wasm-bindgen = { workspace = true }
 wasm-bindgen-test = { workspace = true }
