@@ -1,0 +1,22 @@
+[package]
+name = "lodviz_core"
+version = "0.1.0"
+edition = "2021"
+description = "Core visualization primitives and data structures for lodviz"
+license = "MIT"
+repository = "https://github.com/lodviz-rs/lodviz-rs"
+homepage = "https://github.com/lodviz-rs/lodviz-rs"
+documentation = "https://docs.rs/lodviz_core"
+readme = "README.md"
+keywords = ["visualization", "data", "plotting", "chart", "lttb"]
+categories = ["visualization", "data-structures"]
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+
+[dependencies]
+serde = { workspace = true }
+log = { workspace = true }

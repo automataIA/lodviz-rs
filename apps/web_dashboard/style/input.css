@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* 
+  Explicitly tell Tailwind to scan Rust files for classes.
+  This bypasses the auto-detection limits of the "Oxide" engine.
+*/
+@source "../src/**/*.rs";
+@source "../../../crates/lodviz_components/src/**/*.rs";
+
+@plugin "daisyui" {
+    themes: business --default, light, dark;
+}

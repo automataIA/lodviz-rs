@@ -1,0 +1,41 @@
+[package]
+name = "lodviz_components"
+version = "0.1.0"
+edition = "2021"
+description = "Components for data visualization using lodviz_core"
+license = "MIT"
+repository = "https://github.com/lodviz-rs/lodviz-rs"
+homepage = "https://github.com/lodviz-rs/lodviz-rs"
+documentation = "https://docs.rs/lodviz_components"
+readme = "README.md"
+keywords = ["visualization", "charts", "wasm", "svg"]
+categories = ["visualization", "web-programming::wasm"]
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["wasm32-unknown-unknown"]
+
+[dependencies]
+web-sys = { workspace = true, features = [
+    "Window",
+    "MediaQueryList",
+    "MediaQueryListEvent",
+    "Element",
+    "DomRect",
+    "HtmlElement",
+    "Node",
+    "CssStyleDeclaration",
+    "IntersectionObserver",
+    "IntersectionObserverEntry",
+    "IntersectionObserverInit",
+    "ResizeObserver",
+    "ResizeObserverEntry",
+] }
+leptos = { workspace = true }
+lodviz_core = { path = "../lodviz_core", version = "0.1.0" }
+log = { workspace = true }
+wasm-bindgen = { workspace = true }
+uuid = { version = "1.10", features = ["v4", "js"] }

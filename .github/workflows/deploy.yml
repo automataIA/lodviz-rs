@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Trunk
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/trunk
+          key: ${{ runner.os }}-trunk-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Install Trunk
+        run: cargo install trunk --locked --force
+
+      - name: Install Node.js dependencies
+        run: |
+          cd apps/web_dashboard
+          npm install
+
+      - name: Build with Trunk for GitHub Pages
+        run: |
+          cd apps/web_dashboard
+          trunk build --release --config Trunk.ghpages.toml
+
+      - name: Create .nojekyll file
+        run: touch apps/web_dashboard/dist/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./apps/web_dashboard/dist
