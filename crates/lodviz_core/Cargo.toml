@@ -1,6 +1,6 @@
 [package]
 name = "lodviz_core"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Core visualization primitives and data structures for lodviz"
 license = "MIT"

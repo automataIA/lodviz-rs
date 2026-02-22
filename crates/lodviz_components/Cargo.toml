@@ -1,6 +1,6 @@
 [package]
 name = "lodviz_components"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Components for data visualization using lodviz_core"
 license = "MIT"
@@ -35,7 +35,7 @@ web-sys = { workspace = true, features = [
     "ResizeObserverEntry",
 ] }
 leptos = { workspace = true }
-lodviz_core = { path = "../lodviz_core", version = "0.1.0" }
+lodviz_core = { path = "../lodviz_core", version = "0.1.1" }
 log = { workspace = true }
 wasm-bindgen = { workspace = true }
 uuid = { version = "1.10", features = ["v4", "js"] }

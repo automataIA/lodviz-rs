@@ -981,7 +981,7 @@ dependencies = [
 
 [[package]]
 name = "lodviz_components"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "leptos",
  "lodviz_core",
@@ -993,7 +993,7 @@ dependencies = [
 
 [[package]]
 name = "lodviz_core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "log",
  "serde",

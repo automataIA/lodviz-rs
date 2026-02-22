@@ -1,6 +1,6 @@
 # lodviz_components
 
-[![Crates.io](https://img.shields.io/crates/v/lodviz_components.svg)](https://crates.io/lodviz_components)
+[![Crates.io](https://img.shields.io/crates/v/lodviz_components.svg)](https://crates.io/crates/lodviz_components)
 [![Docs.rs](https://docs.rs/lodviz_components/badge.svg)](https://docs.rs/lodviz_components)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -65,8 +65,6 @@ view! {
 
 ## Installation
 
-Add to your `Cargo.toml`:
-
 ```toml
 [dependencies]
 lodviz_components = "0.1"
@@ -107,20 +105,19 @@ fn App() -> impl IntoView {
 
 ## Data Input
 
-I componenti `lodviz_components` ricevono i dati **esclusivamente come `Signal<T>`**,
-dove `T` è uno dei tipi chart-ready definiti in `lodviz_core::core::data`.
-Non c'è parsing dentro i componenti.
+Components accept data **exclusively as `Signal<T>`**, where `T` is one of the chart-ready
+types defined in `lodviz_core::core::data`. No parsing happens inside components.
 
-| Componente | Tipo del segnale dati |
-|------------|-----------------------|
+| Component | Signal type |
+|-----------|-------------|
 | `LineChart`, `AreaChart`, `ScatterChart` | `Signal<Dataset>` |
 | `BarChart` | `Signal<BarDataset>` |
 | `CandlestickChart` | `Signal<Vec<OhlcBar>>` |
 | `WaterfallChart` | `Signal<Vec<WaterfallBar>>` |
 | `Histogram`, `BoxPlot`, `ViolinChart` | `Signal<Vec<f64>>` |
-| `SmartChart` | `Signal<ChartSpec>` (facade generico) |
+| `SmartChart` | `Signal<ChartSpec>` (generic facade) |
 
-### Da dati statici
+### From static data
 
 ```rust,ignore
 use lodviz_core::core::data::{DataPoint, Dataset, Series};
@@ -137,16 +134,16 @@ let data = Signal::derive(|| Dataset::from_series(
 view! { <LineChart data=data /> }
 ```
 
-### Da CSV remoto (fetch browser)
+### From a remote CSV (browser fetch)
 
-Il crate non fa I/O. Il loading è a carico dell'app:
+This crate performs no I/O. Data loading is the application's responsibility:
 
 ```rust,ignore
 use lodviz_core::core::csv::parse_csv;
 use lodviz_core::core::encoding::{Encoding, Field};
 use leptos::prelude::*;
 
-// LocalResource fa il fetch lato browser (WASM)
+// LocalResource performs the fetch in WASM
 let dataset = LocalResource::new(|| async {
     let text = gloo_net::http::Request::get("/data/sales.csv")
         .send().await.unwrap()
@@ -161,8 +158,8 @@ let dataset = LocalResource::new(|| async {
 });
 ```
 
-Per il pipeline completo (CSV → DataTable → Dataset → downsampling)
-vedi la sezione **Data Pipeline** nel README di [`lodviz_core`](../lodviz_core).
+For the full pipeline (CSV → DataTable → Dataset → downsampling)
+see the **Data Pipeline** section in the [`lodviz_core` README](../lodviz_core).
 
 ## Theming
 

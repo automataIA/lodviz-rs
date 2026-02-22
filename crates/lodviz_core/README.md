@@ -11,16 +11,14 @@ Core visualization primitives and data structures for [`lodviz-rs`](https://gith
 - **Tidy Data Model** — `DataTable`, `DataRow`, and `FieldValue` for heterogeneous, column-oriented data
 - **Grammar of Graphics** — Declarative `Encoding` and `Field` types inspired by Vega-Lite
 - **Scales** — `LinearScale`, `BandScale`, and `OrdinalScale` for mapping data domains to screen ranges
-- **LTTB Downsampling** — Largest-Triangle-Three-Buckets algorithm for visual-preserving time-series reduction
+- **LTTB Downsampling** — Largest-Triangle-Three-Buckets algorithm for visually-preserving time-series reduction
 - **M4 Downsampling** — Fast Min-Max-Min-Max algorithm for large OHLC/financial datasets
 - **Statistical Algorithms** — KDE, box-plot stats, mean, median, percentiles
 - **Theming** — `ChartConfig` and palette definitions reused across renderers
 - **Accessibility** — A11y primitives for screen-reader friendly SVG output
-- **No `std` / WASM-compatible** — Pure logic, no OS runtime dependencies
+- **WASM-compatible** — Pure logic, no OS runtime dependencies
 
 ## Installation
-
-Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -47,7 +45,7 @@ let dataset = Dataset { series: vec![series] };
 
 ### LTTB downsampling
 
-Reduce 10 000 points to 300 while preserving the visual shape:
+Reduce 10,000 points to 300 while preserving the visual shape:
 
 ```rust
 use lodviz_core::core::data::DataPoint;
@@ -83,19 +81,19 @@ let enc = Encoding::new()
 
 ## Data Pipeline
 
-`lodviz_core` accetta dati a **tre livelli di astrazione**, dal più basso al più alto:
+`lodviz_core` accepts data at **three levels of abstraction**, from lowest to highest:
 
 ```
-[1] Vec<DataPoint>          ← raw Rust types, nessun parsing
-[2] DataTable / DataRow     ← tidy model, colonne eterogenee
-[3] parse_csv(&str)         ← CSV testuale → DataTable
+[1] Vec<DataPoint>          ← raw Rust types, no parsing needed
+[2] DataTable / DataRow     ← tidy model, heterogeneous columns
+[3] parse_csv(&str)         ← CSV text → DataTable
 ```
 
-### Livello 1 — Tipi Rust puri
+### Level 1 — Raw Rust types
 
-Il tipo di ingresso nativo per i chart è `Vec<DataPoint>` (x/y di tipo `f64`),
-raggruppato in `Series<DataPoint>` e poi in `Dataset`.
-Nessun parsing, nessuna allocazione extra: costruisci i dati direttamente.
+The native input type for charts is `Vec<DataPoint>` (x/y as `f64`),
+grouped into `Series<DataPoint>` and then `Dataset`.
+No parsing, no extra allocation — construct data directly.
 
 ```rust
 use lodviz_core::core::data::{DataPoint, Dataset, Series};
@@ -107,52 +105,52 @@ let series = Series::new(
 let dataset = Dataset::from_series(series);
 ```
 
-Per chart specializzati esistono tipi dedicati:
+Dedicated types exist for specialised chart kinds:
 
-| Tipo | Usato da |
-|------|----------|
+| Type | Used by |
+|------|---------|
 | `Dataset` (`Vec<Series<DataPoint>>`) | `LineChart`, `ScatterChart`, `AreaChart` |
 | `BarDataset` | `BarChart` |
 | `Vec<OhlcBar>` | `CandlestickChart` |
 | `Vec<WaterfallBar>` | `WaterfallChart` |
 
-### Livello 2 — Tidy Data Model
+### Level 2 — Tidy Data Model
 
-Se i tuoi dati hanno colonne eterogenee (mix di numeri, testo, timestamp),
-usa `DataTable`. Ogni riga è una `DataRow` (`HashMap<String, FieldValue>`).
+When your data has heterogeneous columns (numbers, text, timestamps mixed),
+use `DataTable`. Each row is a `DataRow` (`HashMap<String, FieldValue>`).
 
 ```rust
 use lodviz_core::core::field_value::{DataTable, DataRow, FieldValue};
 use lodviz_core::core::encoding::{Encoding, Field};
 
-// Costruzione manuale
+// Manual construction
 let mut row: DataRow = DataRow::new();
 row.insert("month".into(), FieldValue::Numeric(1.0));
 row.insert("value".into(), FieldValue::Numeric(420.0));
 row.insert("region".into(), FieldValue::Text("North".into()));
 let table = DataTable::from_rows(vec![row]);
 
-// Definisci l'encoding: quale colonna → quale asse / canale colore
+// Define the encoding: which column maps to which axis / color channel
 let enc = Encoding::new(
     Field::quantitative("month"),
     Field::quantitative("value"),
 ).with_color(Field::nominal("region"));
 
-// Converti in Dataset pronto per il chart (fa groupby su "region" in automatico)
+// Convert to a chart-ready Dataset (auto group-by "region")
 let dataset = table.to_dataset(&enc);
 ```
 
-`FieldValue` supporta conversione implicita da tipi primitivi Rust:
+`FieldValue` supports implicit conversion from primitive Rust types:
 
 ```rust
-let v: FieldValue = 3.14_f64.into();    // Numeric
-let v: FieldValue = "East".into();      // Text
-let v: FieldValue = true.into();        // Bool
+let v: FieldValue = 3.14_f64.into();   // Numeric
+let v: FieldValue = "East".into();     // Text
+let v: FieldValue = true.into();       // Bool
 ```
 
-### Livello 3 — CSV parser
+### Level 3 — CSV parser
 
-Per caricare CSV (es. da un fetch HTTP lato browser), usa `parse_csv`:
+To load CSV (e.g. from an HTTP fetch in the browser), use `parse_csv`:
 
 ```rust
 use lodviz_core::core::csv::parse_csv;
@@ -164,19 +162,19 @@ month,value,region
 3,510,North";
 
 let table = parse_csv(csv)?;
-// → stessa DataTable del livello 2, poi encoding come sopra
+// → same DataTable as Level 2, then apply encoding as above
 ```
 
-Regole del parser:
-- Prima riga non vuota e non-commento (`#`) → header
-- Celle numeriche → `FieldValue::Numeric(f64)`
-- Celle non numeriche → `FieldValue::Text`
-- Celle mancanti → `FieldValue::Null`
+Parser rules:
+- First non-empty, non-comment (`#`) line → header
+- Numeric cells → `FieldValue::Numeric(f64)`
+- Non-numeric cells → `FieldValue::Text`
+- Missing cells → `FieldValue::Null`
 
-> **Nota**: il parser accetta `&str`. Il fetch HTTP e la lettura file
-> sono responsabilità dell'applicazione (nessun I/O in questo crate).
+> **Note:** the parser accepts `&str`. HTTP fetching and file I/O are the
+> responsibility of the application — this crate contains no I/O.
 
-### Pipeline completa
+### Full pipeline
 
 ```
 CSV &str
