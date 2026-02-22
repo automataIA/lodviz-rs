@@ -9,7 +9,7 @@ homepage = "https://github.com/lodviz-rs/lodviz-rs"
 documentation = "https://docs.rs/lodviz_components"
 readme = "README.md"
 keywords = ["visualization", "charts", "wasm", "svg"]
-categories = ["visualization", "web-programming::wasm"]
+categories = ["visualization", "wasm"]
 
 [features]
 default = []
