@@ -1,0 +1,9 @@
+label,value,kind
+Start,0.0,start
+Jan,42.0,delta
+Feb,-15.0,delta
+Mar,67.0,delta
+Apr,-23.0,delta
+May,38.0,delta
+Jun,-8.0,delta
+Total,101.0,total
