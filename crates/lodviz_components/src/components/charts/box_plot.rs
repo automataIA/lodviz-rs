@@ -189,6 +189,10 @@ pub fn BoxPlot(
 
     let final_title = Memo::new(move |_| config.get().title.clone());
 
+    let a11y_title_id = format!("chart-title-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_desc_id = format!("chart-desc-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_labelledby = format!("{} {}", a11y_title_id, a11y_desc_id);
+
     // Y scale: extent over ALL groups including whiskers + 5% padding
     let y_scale = Memo::new(move |_| {
         let groups = data.get();
@@ -270,10 +274,13 @@ pub fn BoxPlot(
                         let th = theme.get();
                         view! {
                             <h3 style=format!(
-                                "text-align: center; margin: 0; padding: 0.5rem; font-size: {}px; font-family: {}; color: {};",
-                                th.font_size + 2.0,
+                                "text-align: center; margin: 0; padding-top: {}px; padding-bottom: {}px; font-size: {}px; font-family: {}; color: {}; font-weight: {};",
+                                th.title_padding_top,
+                                th.title_padding_bottom,
+                                th.title_font_size,
                                 th.font_family,
                                 th.text_color,
+                                th.title_font_weight,
                             )>{t}</h3>
                         }
                     })
@@ -281,10 +288,16 @@ pub fn BoxPlot(
             <div node_ref=container_ref style="flex: 1; position: relative; min-height: 0;">
                 <svg
                     role="img"
-                    aria-label="Box plot chart"
+                    aria-labelledby=a11y_labelledby
                     viewBox=move || format!("0 0 {} {}", chart_width.get(), chart_height.get())
                     style="width: 100%; height: 100%; display: block;"
                 >
+                    <title id=a11y_title_id>
+                        {move || final_title.get().unwrap_or_else(|| "Box plot chart".to_string())}
+                    </title>
+                    <desc id=a11y_desc_id>
+                        "Box plot showing distribution of data values across groups, with median, quartiles, and outliers."
+                    </desc>
                     <g transform=move || {
                         format!("translate({}, {})", margin.get().left, margin.get().top)
                     }>
@@ -588,6 +601,10 @@ pub fn ViolinChart(
 
     let final_title = Memo::new(move |_| config.get().title.clone());
 
+    let a11y_title_id_v = format!("chart-title-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_desc_id_v = format!("chart-desc-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_labelledby_v = format!("{} {}", a11y_title_id_v, a11y_desc_id_v);
+
     // Pre-calculate KDEs for all groups to determine global Y extent
     // We store (KDE, max_density) because max_density is needed for width scaling
     // Using Signal::derive instead of Memo because KdeResult doesn't implement PartialEq
@@ -703,10 +720,13 @@ pub fn ViolinChart(
                         let th = theme.get();
                         view! {
                             <h3 style=format!(
-                                "text-align: center; margin: 0; padding: 0.5rem; font-size: {}px; font-family: {}; color: {};",
-                                th.font_size + 2.0,
+                                "text-align: center; margin: 0; padding-top: {}px; padding-bottom: {}px; font-size: {}px; font-family: {}; color: {}; font-weight: {};",
+                                th.title_padding_top,
+                                th.title_padding_bottom,
+                                th.title_font_size,
                                 th.font_family,
                                 th.text_color,
+                                th.title_font_weight,
                             )>{t}</h3>
                         }
                     })
@@ -714,10 +734,16 @@ pub fn ViolinChart(
             <div node_ref=container_ref style="flex: 1; position: relative; min-height: 0;">
                 <svg
                     role="img"
-                    aria-label="Violin chart"
+                    aria-labelledby=a11y_labelledby_v
                     viewBox=move || format!("0 0 {} {}", chart_width.get(), chart_height.get())
                     style="width: 100%; height: 100%; display: block;"
                 >
+                    <title id=a11y_title_id_v>
+                        {move || final_title.get().unwrap_or_else(|| "Violin chart".to_string())}
+                    </title>
+                    <desc id=a11y_desc_id_v>
+                        "Violin plot showing the probability density distribution of data values across groups."
+                    </desc>
                     <g transform=move || {
                         format!("translate({}, {})", margin.get().left, margin.get().top)
                     }>

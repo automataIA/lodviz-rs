@@ -159,3 +159,7 @@ my_*.toml
 !README.md
 !LICENSE
 
+target_tmp/CACHEDIR.TAG
+crates/lodviz_core/target_clippy/CACHEDIR.TAG
+apps/web_dashboard/dist/
+kuva/

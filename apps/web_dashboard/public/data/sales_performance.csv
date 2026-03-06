@@ -1,0 +1,21 @@
+Product,Region,Quarter,Revenue,Units,MarginPct,Status,Target
+Widget Pro,North,Q1,125000.0,850.0,42.5,Active,true
+Widget Pro,South,Q1,98500.0,610.0,38.2,Active,true
+Widget Pro,Center,Q2,141000.0,920.0,35.8,Active,true
+Widget Pro,Europe,Q2,67800.0,410.0,22.0,Paused,false
+Gadget X,North,Q1,88400.0,540.0,41.2,Active,true
+Gadget X,South,Q3,102100.0,630.0,38.9,Active,true
+Gadget X,Center,Q1,73600.0,455.0,29.4,Active,false
+Gadget X,Europe,Q4,210500.0,1280.0,44.6,Active,true
+Toolkit Y,North,Q2,55300.0,340.0,18.3,Paused,false
+Toolkit Y,South,Q2,46900.0,290.0,15.7,Paused,false
+Toolkit Y,Center,Q3,61200.0,380.0,20.5,Active,false
+Toolkit Y,Europe,Q3,39800.0,245.0,12.1,Closed,false
+Module Z,North,Q4,175000.0,1050.0,39.0,Active,true
+Module Z,South,Q4,143700.0,880.0,36.2,Active,true
+Module Z,Center,Q1,96400.0,600.0,31.8,Active,true
+Module Z,Europe,Q2,251300.0,1540.0,47.3,Active,true
+Platform A,North,Q3,312800.0,1920.0,52.1,Active,true
+Platform A,South,Q1,189600.0,1160.0,48.5,Active,true
+Platform A,Center,Q4,267400.0,1640.0,50.7,Active,true
+Platform A,Europe,Q2,198100.0,1210.0,43.9,Paused,false

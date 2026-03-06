@@ -14,6 +14,11 @@ Core visualization primitives and data structures for [`lodviz-rs`](https://gith
 - **LTTB Downsampling** — Largest-Triangle-Three-Buckets algorithm for visually-preserving time-series reduction
 - **M4 Downsampling** — Fast Min-Max-Min-Max algorithm for large OHLC/financial datasets
 - **Statistical Algorithms** — KDE, box-plot stats, mean, median, percentiles
+- **ColorMap** — Perceptually uniform color interpolation via Oklab; sequential palettes (Viridis, Plasma, Inferno, Magma, Cividis, Turbo, Grayscale) and diverging palettes (RdBu, PuOr, PiYG, BrBG)
+- **Beeswarm Layout** — Deterministic jitter / greedy beeswarm placement for strip charts
+- **Sankey Layout** — BFS column assignment + proportional node heights + cubic Bézier ribbons
+- **Chord Layout** — Arc angles from flow totals + quadratic Bézier ribbon paths
+- **Contour Extraction** — Marching squares iso-lines and iso-bands from 2-D scalar grids
 - **Theming** — `ChartConfig` and palette definitions reused across renderers
 - **Accessibility** — A11y primitives for screen-reader friendly SVG output
 - **WASM-compatible** — Pure logic, no OS runtime dependencies
@@ -22,7 +27,7 @@ Core visualization primitives and data structures for [`lodviz-rs`](https://gith
 
 ```toml
 [dependencies]
-lodviz_core = "0.1"
+lodviz_core = "0.2"
 ```
 
 ## Usage
@@ -107,12 +112,16 @@ let dataset = Dataset::from_series(series);
 
 Dedicated types exist for specialised chart kinds:
 
-| Type | Used by |
-|------|---------|
-| `Dataset` (`Vec<Series<DataPoint>>`) | `LineChart`, `ScatterChart`, `AreaChart` |
-| `BarDataset` | `BarChart` |
-| `Vec<OhlcBar>` | `CandlestickChart` |
-| `Vec<WaterfallBar>` | `WaterfallChart` |
+| Type | Used by | `DataTable` conversion method |
+|------|---------|-------------------------------|
+| `Dataset` (`Vec<Series<DataPoint>>`) | `LineChart`, `ScatterChart`, `AreaChart` | `table.to_dataset(&enc)` |
+| `BarDataset` | `BarChart` | `table.to_bar_dataset(&enc)` |
+| `Vec<OhlcBar>` | `CandlestickChart` | — |
+| `Vec<WaterfallBar>` | `WaterfallChart` | — |
+| `GridData` | `HeatmapChart`, `ContourChart` | `table.to_grid_wide(label_col, value_cols)` · `table.to_grid_long(row_col, col_col, value_col, fill)` |
+| `Vec<StripGroup>` | `StripChart` | `table.to_strip_groups(group_col, value_col)` |
+| `SankeyData` | `SankeyChart` | `table.to_sankey(src_col, dst_col, value_col, color_col)` |
+| `ChordData` | `ChordChart` | `table.to_chord_matrix(label_col, value_cols)` |
 
 ### Level 2 — Tidy Data Model
 
@@ -189,6 +198,9 @@ CSV &str
 - **LTTB**: Sveinn Steinarsson (2013) — *Downsampling Time Series for Visual Representation*
   ([PDF](http://skemman.is/stream/get/1946/15343/37285/3/SS_MSthesis.pdf))
 - **M4**: Uwe Jugel et al. (2014) — *M4: A Visualization-Oriented Time Series Data Aggregation*
+- **Oklab**: Björn Ottosson (2020) — *A perceptual color space for image processing*
+  ([blog](https://bottosson.github.io/posts/oklab/))
+- **Marching Squares**: Lorensen & Cline (1987) — classic iso-contour extraction via 2×2 cell case table
 
 ## License
 

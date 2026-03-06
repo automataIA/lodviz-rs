@@ -31,6 +31,39 @@ pub async fn fetch_csv(url: &str) -> Result<DataTable, String> {
     parse_csv(&text)
 }
 
+use lodviz_core::core::table_data::{ColumnDef, ColumnType, TableData};
+
+/// Fetch a CSV file from `url` and parse it into a [`TableData`] for use with `DataTable` component.
+pub async fn fetch_table_data(url: &str) -> Result<TableData, String> {
+    let dt = fetch_csv(url).await?;
+
+    // Infer columns from the keys of the first row
+    let mut columns = Vec::new();
+    if let Some(first_row) = dt.rows().first() {
+        for (k, _) in first_row.iter() {
+            columns.push(ColumnDef::new(k, k, ColumnType::Text));
+        }
+    }
+
+    let rows = dt
+        .rows()
+        .iter()
+        .map(|row| {
+            let mut row_values = Vec::new();
+            for col in &columns {
+                row_values.push(
+                    row.get(&col.key)
+                        .cloned()
+                        .unwrap_or(lodviz_core::core::field_value::FieldValue::Null),
+                );
+            }
+            row_values
+        })
+        .collect();
+
+    Ok(TableData::new(columns, rows))
+}
+
 // --- Conversion helpers ---
 
 /// `DataTable(x, y)` → single-series `Dataset`

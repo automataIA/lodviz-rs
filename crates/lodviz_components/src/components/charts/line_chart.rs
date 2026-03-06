@@ -1,4 +1,5 @@
 /// LineChart component with LTTB downsampling and multi-series support
+use crate::components::interaction::linked_context::DashboardContext;
 use crate::components::interaction::zoom_pan::{ZoomPan, ZoomTransform};
 use crate::components::layout::card_registry::get_card_transform_signal;
 use crate::components::layout::draggable_card::CardId;
@@ -324,8 +325,11 @@ pub fn LineChart(
     let x_label_clone = x_label.clone();
     let y_label_clone = y_label.clone();
 
-    // Unique ID for clip path
+    // Unique IDs for clip path and a11y
     let clip_id = format!("clip-{}", uuid::Uuid::new_v4());
+    let a11y_title_id = format!("chart-title-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_desc_id = format!("chart-desc-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_labelledby = format!("{} {}", a11y_title_id, a11y_desc_id);
 
     // Cursor tracking for tooltips
     let (cursor_norm, set_cursor_norm) = signal(None::<(f64, f64)>);
@@ -333,7 +337,31 @@ pub fn LineChart(
     // Derived cursor X for tooltips (normalized X)
     let cursor_x = Memo::new(move |_| cursor_norm.get().map(|(x, _)| x));
 
-    // Debug logging removed
+    // --- Linked dashboard crosshair ---
+    // Extract the shared hover_x signal from DashboardContext (if wrapped in LinkedDashboard)
+    let dash_hover_x = use_context::<DashboardContext>().map(|ctx| ctx.hover_x);
+
+    // Emit our cursor position as domain-X to the shared context
+    Effect::new(move |_| {
+        let Some(hover_signal) = dash_hover_x else { return };
+        let domain_x = cursor_norm.get().map(|(norm_x, _)| {
+            let t = zoom_transform.get();
+            t.x_min + norm_x * (t.x_max - t.x_min)
+        });
+        hover_signal.set(domain_x);
+    });
+
+    // Crosshair from other linked charts (only when THIS chart is not being hovered)
+    let crosshair_svg_x = Signal::derive(move || -> Option<f64> {
+        let hover_signal = dash_hover_x?;
+        if cursor_norm.get().is_some() {
+            return None; // We are the source — tooltip covers it
+        }
+        let domain_x = hover_signal.get()?;
+        let svg_x = x_scale.get().map(domain_x);
+        let w = inner_width.get();
+        (svg_x >= 0.0 && svg_x <= w).then_some(svg_x)
+    });
 
     view! {
         <div
@@ -352,10 +380,13 @@ pub fn LineChart(
                         let th = theme.get();
                         view! {
                             <h3 style=format!(
-                                "text-align: center; margin: 0; padding: 0.5rem; font-size: {}px; font-family: {}; color: {};",
-                                th.font_size + 2.0,
+                                "text-align: center; margin: 0; padding-top: {}px; padding-bottom: {}px; font-size: {}px; font-family: {}; color: {}; font-weight: {};",
+                                th.title_padding_top,
+                                th.title_padding_bottom,
+                                th.title_font_size,
                                 th.font_family,
                                 th.text_color,
+                                th.title_font_weight,
                             )>{t}</h3>
                         }
                     })
@@ -363,7 +394,7 @@ pub fn LineChart(
             <div node_ref=container_ref style="flex: 1; min-height: 0; position: relative;">
                 <svg
                     role="img"
-                    aria-label=move || aria_label.get()
+                    aria-labelledby=a11y_labelledby
                     tabindex="0"
                     viewBox=move || format!("0 0 {} {}", chart_width.get(), chart_height.get())
                     style="width: 100%; height: 100%; display: block; outline: none; will-change: transform;"
@@ -405,8 +436,8 @@ pub fn LineChart(
                         }
                     }
                 >
-                    <title>{move || aria_label.get()}</title>
-                    <desc>{move || chart_description.get()}</desc>
+                    <title id=a11y_title_id>{move || aria_label.get()}</title>
+                    <desc id=a11y_desc_id>{move || chart_description.get()}</desc>
                     <g transform=move || {
                         format!("translate({}, {})", margin.get().left, margin.get().top)
                     }>
@@ -553,6 +584,25 @@ pub fn LineChart(
                                     label=y_label_clone.clone()
                                 />
                             }
+                        }}
+
+                        // Crosshair from linked DashboardContext
+                        {move || {
+                            crosshair_svg_x.get().map(|x| {
+                                let h = inner_height.get();
+                                view! {
+                                    <line
+                                        x1=x
+                                        y1="0"
+                                        x2=x
+                                        y2=h
+                                        stroke="rgba(128, 128, 255, 0.65)"
+                                        stroke-width="1"
+                                        stroke-dasharray="4,3"
+                                        style="pointer-events: none;"
+                                    />
+                                }
+                            })
                         }}
 
                         // Tooltip overlay (must be last to receive mouse events)

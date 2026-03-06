@@ -104,6 +104,10 @@ pub fn RadarChart(
 
     let final_title = Memo::new(move |_| config.get().title.clone());
 
+    let a11y_title_id = format!("chart-title-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_desc_id = format!("chart-desc-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_labelledby = format!("{} {}", a11y_title_id, a11y_desc_id);
+
     let n_axes = axes.len();
     let axes_clone = axes.clone();
     let axes_for_tooltip = axes.clone();
@@ -191,10 +195,13 @@ pub fn RadarChart(
                         let th = theme.get();
                         view! {
                             <h3 style=format!(
-                                "text-align: center; margin: 0; padding: 0.5rem; font-size: {}px; font-family: {}; color: {};",
-                                th.font_size + 2.0,
+                                "text-align: center; margin: 0; padding-top: {}px; padding-bottom: {}px; font-size: {}px; font-family: {}; color: {}; font-weight: {};",
+                                th.title_padding_top,
+                                th.title_padding_bottom,
+                                th.title_font_size,
                                 th.font_family,
                                 th.text_color,
+                                th.title_font_weight,
                             )>{t}</h3>
                         }
                     })
@@ -202,10 +209,16 @@ pub fn RadarChart(
             <div node_ref=container_ref style="flex: 1; position: relative; min-height: 0;">
                 <svg
                     role="img"
-                    aria-label="Radar chart"
+                    aria-labelledby=a11y_labelledby
                     viewBox=move || format!("0 0 {} {}", chart_width.get(), chart_height.get())
                     style="width: 100%; height: 100%; display: block;"
                 >
+                    <title id=a11y_title_id>
+                        {move || final_title.get().unwrap_or_else(|| "Radar chart".to_string())}
+                    </title>
+                    <desc id=a11y_desc_id>
+                        "Radar chart comparing multiple quantitative variables across one or more categories."
+                    </desc>
                     <g transform=move || {
                         format!("translate({}, {})", margin.get().left, margin.get().top)
                     }>

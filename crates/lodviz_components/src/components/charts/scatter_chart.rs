@@ -223,6 +223,10 @@ pub fn ScatterChart(
             .unwrap_or_else(|| "Scatter chart".to_string())
     });
 
+    let a11y_title_id = format!("chart-title-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_desc_id = format!("chart-desc-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_labelledby = format!("{} {}", a11y_title_id, a11y_desc_id);
+
     let on_legend_toggle = Callback::new(move |idx: usize| {
         let mut vis = series_visibility.get();
         if let Some(v) = vis.get_mut(idx) {
@@ -295,10 +299,13 @@ pub fn ScatterChart(
                         let th = theme.get();
                         view! {
                             <h3 style=format!(
-                                "text-align: center; margin: 0; padding: 0.5rem; font-size: {}px; font-family: {}; color: {};",
-                                th.font_size + 2.0,
+                                "text-align: center; margin: 0; padding-top: {}px; padding-bottom: {}px; font-size: {}px; font-family: {}; color: {}; font-weight: {};",
+                                th.title_padding_top,
+                                th.title_padding_bottom,
+                                th.title_font_size,
                                 th.font_family,
                                 th.text_color,
+                                th.title_font_weight,
                             )>{t}</h3>
                         }
                     })
@@ -306,7 +313,7 @@ pub fn ScatterChart(
             <div node_ref=container_ref style="flex: 1; position: relative; min-height: 0;">
                 <svg
                     role="img"
-                    aria-label=move || aria_label.get()
+                    aria-labelledby=a11y_labelledby
                     tabindex="0"
                     viewBox=move || format!("0 0 {} {}", chart_width.get(), chart_height.get())
                     style="width: 100%; height: 100%; display: block; outline: none; will-change: transform;"
@@ -348,8 +355,8 @@ pub fn ScatterChart(
                         }
                     }
                 >
-                    <title>{move || aria_label.get()}</title>
-                    <desc>{move || chart_description.get()}</desc>
+                    <title id=a11y_title_id>{move || aria_label.get()}</title>
+                    <desc id=a11y_desc_id>{move || chart_description.get()}</desc>
                     <g transform=move || {
                         format!("translate({}, {})", margin.get().left, margin.get().top)
                     }>

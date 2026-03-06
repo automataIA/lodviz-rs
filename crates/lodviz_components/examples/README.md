@@ -16,7 +16,7 @@ Then open <http://localhost:3000> in your browser.
 
 | Route | What it shows |
 |-------|---------------|
-| `/` | Overview — all chart types in a grid |
+| `/` | Overview — all 20 chart types in a draggable dashboard |
 | `/line` | `LineChart` with multi-series and LTTB downsampling |
 | `/bar` | `BarChart` grouped and stacked modes |
 | `/scatter` | `ScatterChart` with brush selection |
@@ -24,6 +24,11 @@ Then open <http://localhost:3000> in your browser.
 | `/candlestick` | `CandlestickChart` with M4 downsampling |
 | `/dashboard` | `LinkedDashboard` with zoom/pan and brushing |
 | `/theme` | `ThemeProvider` light/dark mode toggle |
+
+The home page (`/`) includes live demos of all chart types:
+**LineChart**, **BarChart**, **ScatterChart**, **AreaChart**, **PieChart**, **BoxPlot**,
+**Histogram**, **CandlestickChart**, **RadarChart**, **WaterfallChart**, **ViolinChart**,
+**HeatmapChart**, **StripChart**, **SankeyChart**, **ChordChart**, **ContourChart**.
 
 ## Writing your own chart
 

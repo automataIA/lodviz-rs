@@ -1,4 +1,5 @@
 /// AreaChart component with fill area, LTTB downsampling and multi-series support
+use crate::components::interaction::linked_context::DashboardContext;
 use crate::components::interaction::zoom_pan::{ZoomPan, ZoomTransform};
 use crate::components::svg::axis::{Axis, AxisOrientation};
 use crate::components::svg::grid::Grid;
@@ -336,8 +337,34 @@ pub fn AreaChart(
     let (cursor_norm, set_cursor_norm) = signal(None::<(f64, f64)>);
     let cursor_x = Memo::new(move |_| cursor_norm.get().map(|(x, _)| x));
 
-    // Clip ID
+    // --- Linked dashboard crosshair ---
+    let dash_hover_x = use_context::<DashboardContext>().map(|ctx| ctx.hover_x);
+
+    Effect::new(move |_| {
+        let Some(hover_signal) = dash_hover_x else { return };
+        let domain_x = cursor_norm.get().map(|(norm_x, _)| {
+            let t = zoom_transform.get();
+            t.x_min + norm_x * (t.x_max - t.x_min)
+        });
+        hover_signal.set(domain_x);
+    });
+
+    let crosshair_svg_x = Signal::derive(move || -> Option<f64> {
+        let hover_signal = dash_hover_x?;
+        if cursor_norm.get().is_some() {
+            return None;
+        }
+        let domain_x = hover_signal.get()?;
+        let svg_x = x_scale.get().map(domain_x);
+        let w = inner_width.get();
+        (svg_x >= 0.0 && svg_x <= w).then_some(svg_x)
+    });
+
+    // Clip ID and a11y IDs
     let clip_id = format!("clip-{}", uuid::Uuid::new_v4());
+    let a11y_title_id = format!("chart-title-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_desc_id = format!("chart-desc-{}", uuid::Uuid::new_v4().as_simple());
+    let a11y_labelledby = format!("{} {}", a11y_title_id, a11y_desc_id);
     let clip_id_def = clip_id.clone();
     let clip_id_area = clip_id.clone();
     let clip_id_line = clip_id.clone();
@@ -359,10 +386,13 @@ pub fn AreaChart(
                         let th = theme.get();
                         view! {
                             <h3 style=format!(
-                                "text-align: center; margin: 0; padding: 0.5rem; font-size: {}px; font-family: {}; color: {};",
-                                th.font_size + 2.0,
+                                "text-align: center; margin: 0; padding-top: {}px; padding-bottom: {}px; font-size: {}px; font-family: {}; color: {}; font-weight: {};",
+                                th.title_padding_top,
+                                th.title_padding_bottom,
+                                th.title_font_size,
                                 th.font_family,
                                 th.text_color,
+                                th.title_font_weight,
                             )>{t}</h3>
                         }
                     })
@@ -370,7 +400,7 @@ pub fn AreaChart(
             <div node_ref=container_ref style="flex: 1; position: relative; min-height: 0;">
                 <svg
                     role="img"
-                    aria-label=move || aria_label.get()
+                    aria-labelledby=a11y_labelledby
                     tabindex="0"
                     viewBox=move || format!("0 0 {} {}", chart_width.get(), chart_height.get())
                     style="width: 100%; height: 100%; display: block; outline: none; will-change: transform;"
@@ -412,8 +442,8 @@ pub fn AreaChart(
                         }
                     }
                 >
-                    <title>{move || aria_label.get()}</title>
-                    <desc>{move || chart_description.get()}</desc>
+                    <title id=a11y_title_id>{move || aria_label.get()}</title>
+                    <desc id=a11y_desc_id>{move || chart_description.get()}</desc>
                     <g transform=move || {
                         format!("translate({}, {})", margin.get().left, margin.get().top)
                     }>
@@ -589,6 +619,25 @@ pub fn AreaChart(
                                     label=y_label_clone.clone()
                                 />
                             }
+                        }}
+
+                        // Crosshair from linked DashboardContext
+                        {move || {
+                            crosshair_svg_x.get().map(|x| {
+                                let h = inner_height.get();
+                                view! {
+                                    <line
+                                        x1=x
+                                        y1="0"
+                                        x2=x
+                                        y2=h
+                                        stroke="rgba(128, 128, 255, 0.65)"
+                                        stroke-width="1"
+                                        stroke-dasharray="4,3"
+                                        style="pointer-events: none;"
+                                    />
+                                }
+                            })
                         }}
 
                         // Tooltip overlay

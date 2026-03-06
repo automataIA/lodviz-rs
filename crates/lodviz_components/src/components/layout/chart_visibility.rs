@@ -75,7 +75,7 @@ pub fn ChartVisibility(children: ChildrenFn) -> impl IntoView {
     });
 
     view! {
-        <div node_ref=container_ref style="width: 100%; height: 100%;">
+        <div node_ref=container_ref class="flex flex-col flex-1 min-h-0 w-full h-full">
             <Show when=move || has_been_visible.get()>{children()}</Show>
         </div>
     }

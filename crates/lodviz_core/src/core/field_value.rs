@@ -5,7 +5,10 @@
 /// to `Dataset` or `BarDataset` using an `Encoding` specification.
 use std::collections::HashMap;
 
-use crate::core::data::{BarDataset, DataPoint, Dataset, Series};
+use crate::core::data::{
+    BarDataset, ChordData, DataPoint, Dataset, GridData, SankeyData, SankeyLink, SankeyNode,
+    Series, StripGroup,
+};
 use crate::core::encoding::Encoding;
 
 // --- FieldValue ---
@@ -294,6 +297,237 @@ impl DataTable {
         bar_dataset
     }
 
+    // --- New chart type conversions ---
+
+    /// Long/tidy table → `Vec<StripGroup>` for `StripChart`.
+    ///
+    /// Groups rows by the distinct values of `group_col`; all numeric values
+    /// in `value_col` within a group are collected into one `StripGroup`.
+    /// Rows with missing values are silently skipped.
+    ///
+    /// ```text
+    /// group  | value
+    /// -------+------
+    /// Control| 2.1
+    /// Control| 1.9
+    /// Group A| 4.5
+    /// ```
+    pub fn to_strip_groups(&self, group_col: &str, value_col: &str) -> Vec<StripGroup> {
+        self.group_by(group_col)
+            .into_iter()
+            .map(|(name, sub)| StripGroup {
+                name,
+                values: sub.extract_numeric(value_col),
+            })
+            .collect()
+    }
+
+    /// Edge-list table → `SankeyData` for `SankeyChart`.
+    ///
+    /// Each row is a directed link. Node labels are inferred from the
+    /// source and target columns in first-seen order — no separate node table
+    /// is required. The optional `color_col` sets the link color (e.g. `"#e15759"`).
+    ///
+    /// ```text
+    /// source      | target      | value
+    /// ------------+-------------+------
+    /// Coal        | Electricity | 40
+    /// Coal        | Heat        | 20
+    /// Gas         | Electricity | 30
+    /// ```
+    pub fn to_sankey(
+        &self,
+        source_col: &str,
+        target_col: &str,
+        value_col: &str,
+        color_col: Option<&str>,
+    ) -> SankeyData {
+        let mut label_index: std::collections::HashMap<String, usize> =
+            std::collections::HashMap::new();
+        let mut nodes: Vec<SankeyNode> = Vec::new();
+        let mut links: Vec<SankeyLink> = Vec::new();
+
+        for row in &self.rows {
+            let Some(src_label) = row
+                .get(source_col)
+                .and_then(FieldValue::as_str)
+                .map(str::to_owned)
+            else {
+                continue;
+            };
+            let Some(dst_label) = row
+                .get(target_col)
+                .and_then(FieldValue::as_str)
+                .map(str::to_owned)
+            else {
+                continue;
+            };
+            let Some(value) = row.get(value_col).and_then(FieldValue::as_f64) else {
+                continue;
+            };
+
+            let color = color_col
+                .and_then(|col| row.get(col))
+                .and_then(FieldValue::as_str)
+                .map(str::to_owned);
+
+            let source = *label_index.entry(src_label.clone()).or_insert_with(|| {
+                let idx = nodes.len();
+                nodes.push(SankeyNode {
+                    label: src_label,
+                    color: None,
+                });
+                idx
+            });
+            let target = *label_index.entry(dst_label.clone()).or_insert_with(|| {
+                let idx = nodes.len();
+                nodes.push(SankeyNode {
+                    label: dst_label,
+                    color: None,
+                });
+                idx
+            });
+
+            links.push(SankeyLink {
+                source,
+                target,
+                value,
+                color,
+            });
+        }
+
+        SankeyData { nodes, links }
+    }
+
+    /// Wide square-matrix table → `ChordData` for `ChordChart`.
+    ///
+    /// `label_col` contains group names; `value_cols` are the flow columns
+    /// in the same order as the groups (i.e. a symmetric or asymmetric NxN matrix).
+    ///
+    /// ```text
+    /// label    | Europe | Americas | Asia
+    /// ---------+--------+----------+-----
+    /// Europe   |      0 |       12 |    8
+    /// Americas |      7 |        0 |   15
+    /// Asia     |      6 |       11 |    0
+    /// ```
+    pub fn to_chord_matrix(&self, label_col: &str, value_cols: &[&str]) -> ChordData {
+        let labels: Vec<String> = self
+            .rows
+            .iter()
+            .filter_map(|row| row.get(label_col)?.as_str().map(str::to_owned))
+            .collect();
+
+        let matrix: Vec<Vec<f64>> = self
+            .rows
+            .iter()
+            .map(|row| {
+                value_cols
+                    .iter()
+                    .map(|col| row.get(*col).and_then(FieldValue::as_f64).unwrap_or(0.0))
+                    .collect()
+            })
+            .collect();
+
+        ChordData {
+            matrix,
+            labels,
+            colors: None,
+        }
+    }
+
+    /// Wide-format table → `GridData` for `HeatmapChart` / `ContourChart`.
+    ///
+    /// Each row of the table becomes one row of the grid. `value_cols` are
+    /// the column names whose numeric values fill the cells (they also become
+    /// column labels). The optional `label_col` provides row labels.
+    ///
+    /// ```text
+    /// name      | Jan  | Feb  | Mar
+    /// ----------+------+------+-----
+    /// Product A | 10.5 |  8.2 | 12.1
+    /// Product B |  6.3 |  9.0 |  7.4
+    /// ```
+    pub fn to_grid_wide(&self, label_col: Option<&str>, value_cols: &[&str]) -> GridData {
+        let row_labels = label_col.map(|col| {
+            self.rows
+                .iter()
+                .filter_map(|row| row.get(col)?.as_str().map(str::to_owned))
+                .collect()
+        });
+
+        let values: Vec<Vec<f64>> = self
+            .rows
+            .iter()
+            .map(|row| {
+                value_cols
+                    .iter()
+                    .map(|col| row.get(*col).and_then(FieldValue::as_f64).unwrap_or(0.0))
+                    .collect()
+            })
+            .collect();
+
+        let col_labels = Some(value_cols.iter().map(|s| (*s).to_owned()).collect());
+
+        GridData {
+            values,
+            row_labels,
+            col_labels,
+        }
+    }
+
+    /// Long/tidy-format table → `GridData` for `HeatmapChart` / `ContourChart`.
+    ///
+    /// Each row is one cell: integer row/col indices and a numeric value.
+    /// Missing cells are filled with `fill_value` (use `0.0` or `f64::NAN`).
+    ///
+    /// ```text
+    /// row | col | value
+    /// ----+-----+------
+    ///   0 |   0 |   0.8
+    ///   0 |   1 |   0.3
+    ///   1 |   0 |   0.5
+    ///   1 |   1 |   1.0
+    /// ```
+    pub fn to_grid_long(
+        &self,
+        row_col: &str,
+        col_col: &str,
+        value_col: &str,
+        fill_value: f64,
+    ) -> GridData {
+        let mut n_rows = 0usize;
+        let mut n_cols = 0usize;
+        let mut cells: Vec<(usize, usize, f64)> = Vec::new();
+
+        for row in &self.rows {
+            let Some(r) = row.get(row_col).and_then(FieldValue::as_f64) else {
+                continue;
+            };
+            let Some(c) = row.get(col_col).and_then(FieldValue::as_f64) else {
+                continue;
+            };
+            let Some(v) = row.get(value_col).and_then(FieldValue::as_f64) else {
+                continue;
+            };
+            let (ri, ci) = (r as usize, c as usize);
+            n_rows = n_rows.max(ri + 1);
+            n_cols = n_cols.max(ci + 1);
+            cells.push((ri, ci, v));
+        }
+
+        let mut values = vec![vec![fill_value; n_cols]; n_rows];
+        for (ri, ci, v) in cells {
+            values[ri][ci] = v;
+        }
+
+        GridData {
+            values,
+            row_labels: None,
+            col_labels: None,
+        }
+    }
+
     // --- Internal helper ---
 
     fn extract_xy(&self, x_col: &str, y_col: &str) -> Vec<DataPoint> {
@@ -473,5 +707,119 @@ mod tests {
         let enc = Encoding::new(Field::quantitative("x"), Field::quantitative("y"));
         let ds = t.to_dataset(&enc);
         assert!(ds.series.is_empty() || ds.series[0].data.is_empty());
+    }
+
+    // --- Tests for new chart type conversions ---
+
+    fn make_strip_table() -> DataTable {
+        let mut t = DataTable::default();
+        for (group, value) in [("A", 1.0), ("A", 2.0), ("B", 3.0), ("B", 4.0), ("B", 5.0)] {
+            let mut row = DataRow::new();
+            row.insert("group".into(), FieldValue::Text(group.into()));
+            row.insert("value".into(), FieldValue::Numeric(value));
+            t.push(row);
+        }
+        t
+    }
+
+    #[test]
+    fn test_to_strip_groups_count() {
+        let t = make_strip_table();
+        let groups = t.to_strip_groups("group", "value");
+        assert_eq!(groups.len(), 2);
+    }
+
+    #[test]
+    fn test_to_strip_groups_values() {
+        let t = make_strip_table();
+        let groups = t.to_strip_groups("group", "value");
+        let a = groups.iter().find(|g| g.name == "A").unwrap();
+        assert_eq!(a.values, vec![1.0, 2.0]);
+        let b = groups.iter().find(|g| g.name == "B").unwrap();
+        assert_eq!(b.values, vec![3.0, 4.0, 5.0]);
+    }
+
+    #[test]
+    fn test_to_sankey_infers_nodes() {
+        let mut t = DataTable::default();
+        for (src, dst, val) in [("Coal", "Electricity", 40.0), ("Gas", "Electricity", 30.0)] {
+            let mut row = DataRow::new();
+            row.insert("src".into(), FieldValue::Text(src.into()));
+            row.insert("dst".into(), FieldValue::Text(dst.into()));
+            row.insert("val".into(), FieldValue::Numeric(val));
+            t.push(row);
+        }
+        let sankey = t.to_sankey("src", "dst", "val", None);
+        // 3 unique labels: Coal, Gas, Electricity
+        assert_eq!(sankey.nodes.len(), 3);
+        assert_eq!(sankey.links.len(), 2);
+        assert_eq!(sankey.links[0].value, 40.0);
+    }
+
+    #[test]
+    fn test_to_sankey_link_indices() {
+        let mut t = DataTable::default();
+        let mut row = DataRow::new();
+        row.insert("src".into(), FieldValue::Text("A".into()));
+        row.insert("dst".into(), FieldValue::Text("B".into()));
+        row.insert("val".into(), FieldValue::Numeric(10.0));
+        t.push(row);
+        let sankey = t.to_sankey("src", "dst", "val", None);
+        // A=0, B=1
+        assert_eq!(sankey.links[0].source, 0);
+        assert_eq!(sankey.links[0].target, 1);
+    }
+
+    #[test]
+    fn test_to_chord_matrix_shape() {
+        let mut t = DataTable::default();
+        for (label, v0, v1) in [("X", 0.0, 5.0), ("Y", 3.0, 0.0)] {
+            let mut row = DataRow::new();
+            row.insert("label".into(), FieldValue::Text(label.into()));
+            row.insert("X".into(), FieldValue::Numeric(v0));
+            row.insert("Y".into(), FieldValue::Numeric(v1));
+            t.push(row);
+        }
+        let chord = t.to_chord_matrix("label", &["X", "Y"]);
+        assert_eq!(chord.labels, vec!["X", "Y"]);
+        assert_eq!(chord.matrix.len(), 2);
+        assert_eq!(chord.matrix[0], vec![0.0, 5.0]);
+        assert_eq!(chord.matrix[1], vec![3.0, 0.0]);
+    }
+
+    #[test]
+    fn test_to_grid_wide_shape() {
+        let mut t = DataTable::default();
+        for (name, a, b) in [("R1", 1.0, 2.0), ("R2", 3.0, 4.0)] {
+            let mut row = DataRow::new();
+            row.insert("name".into(), FieldValue::Text(name.into()));
+            row.insert("A".into(), FieldValue::Numeric(a));
+            row.insert("B".into(), FieldValue::Numeric(b));
+            t.push(row);
+        }
+        let grid = t.to_grid_wide(Some("name"), &["A", "B"]);
+        assert_eq!(grid.values.len(), 2);
+        assert_eq!(grid.values[0], vec![1.0, 2.0]);
+        assert_eq!(
+            grid.row_labels,
+            Some(vec!["R1".to_owned(), "R2".to_owned()])
+        );
+        assert_eq!(grid.col_labels, Some(vec!["A".to_owned(), "B".to_owned()]));
+    }
+
+    #[test]
+    fn test_to_grid_long_fills() {
+        let mut t = DataTable::default();
+        for (r, c, v) in [(0.0, 0.0, 1.0), (1.0, 1.0, 2.0)] {
+            let mut row = DataRow::new();
+            row.insert("row".into(), FieldValue::Numeric(r));
+            row.insert("col".into(), FieldValue::Numeric(c));
+            row.insert("val".into(), FieldValue::Numeric(v));
+            t.push(row);
+        }
+        let grid = t.to_grid_long("row", "col", "val", 0.0);
+        assert_eq!(grid.values.len(), 2);
+        assert_eq!(grid.values[0], vec![1.0, 0.0]); // (0,0)=1, (0,1)=fill
+        assert_eq!(grid.values[1], vec![0.0, 2.0]); // (1,0)=fill, (1,1)=2
     }
 }

@@ -15,7 +15,7 @@ gloo-net = { version = "0.6", features = ["http"] }
 
 # Local crates
 lodviz_core = { path = "../../crates/lodviz_core" }
-lodviz_components = { version = "0.1.0", path = "../../crates/lodviz_components" }
+lodviz_components = { version = "0.2.0", path = "../../crates/lodviz_components" }
 
 [features]
 gh-pages = []

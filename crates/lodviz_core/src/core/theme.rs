@@ -60,6 +60,46 @@ pub struct ChartTheme {
     pub line_opacity: f64,
     /// Fill opacity for area charts (0.0 to 1.0)
     pub area_opacity: f64,
+    /// Title font size
+    pub title_font_size: f64,
+    /// Title font weight
+    pub title_font_weight: String,
+    /// Title top padding
+    pub title_padding_top: f64,
+    /// Title bottom padding
+    pub title_padding_bottom: f64,
+    /// Table background color
+    pub table_bg: String,
+    /// Table border color
+    pub table_border: String,
+    /// Table header background color
+    pub table_header_bg: String,
+    /// Table header text color
+    pub table_header_text: String,
+    /// Table body text color
+    pub table_text: String,
+    /// Table row hover background color
+    pub table_hover: String,
+    /// Table selected row background color
+    pub table_selected: String,
+    /// Table primary action color
+    pub table_primary: String,
+    /// Table primary action hover color
+    pub table_primary_hover: String,
+    /// Table danger / error color
+    pub table_danger: String,
+    /// Table success color
+    pub table_success: String,
+    /// Table muted text color
+    pub table_muted: String,
+    /// Table input background color
+    pub table_input_bg: String,
+    /// Table input border color
+    pub table_input_border: String,
+    /// Table input text color
+    pub table_input_text: String,
+    /// Table accent color
+    pub table_accent: String,
 }
 
 impl Default for ChartTheme {
@@ -88,6 +128,26 @@ impl Default for ChartTheme {
             point_opacity: 0.5,
             line_opacity: 0.5,
             area_opacity: 0.5,
+            title_font_size: 16.0,
+            title_font_weight: "bold".to_string(),
+            title_padding_top: 10.0,
+            title_padding_bottom: 20.0,
+            table_bg: "#ffffff".to_string(),
+            table_border: "#e5e7eb".to_string(),
+            table_header_bg: "#f8fafc".to_string(),
+            table_header_text: "#1e293b".to_string(),
+            table_text: "#334155".to_string(),
+            table_hover: "#f1f5f9".to_string(),
+            table_selected: "#e2e8f0".to_string(),
+            table_primary: "#3b82f6".to_string(),
+            table_primary_hover: "#2563eb".to_string(),
+            table_danger: "#ef4444".to_string(),
+            table_success: "#22c55e".to_string(),
+            table_muted: "#94a3b8".to_string(),
+            table_input_bg: "#ffffff".to_string(),
+            table_input_border: "#cbd5e1".to_string(),
+            table_input_text: "#0f172a".to_string(),
+            table_accent: "#6366f1".to_string(),
         }
     }
 }
@@ -122,6 +182,26 @@ impl ChartTheme {
             point_opacity: 0.5,
             line_opacity: 0.5,
             area_opacity: 0.5,
+            title_font_size: 16.0,
+            title_font_weight: "bold".to_string(),
+            title_padding_top: 10.0,
+            title_padding_bottom: 20.0,
+            table_bg: "#100c2a".to_string(),
+            table_border: "#2b2b2b".to_string(),
+            table_header_bg: "#1a163a".to_string(),
+            table_header_text: "#eeeeee".to_string(),
+            table_text: "#cccccc".to_string(),
+            table_hover: "#1f1b40".to_string(),
+            table_selected: "#2a2552".to_string(),
+            table_primary: "#4992ff".to_string(),
+            table_primary_hover: "#6aa5ff".to_string(),
+            table_danger: "#ff6e76".to_string(),
+            table_success: "#05c091".to_string(),
+            table_muted: "#666666".to_string(),
+            table_input_bg: "#100c2a".to_string(),
+            table_input_border: "#3b3b3b".to_string(),
+            table_input_text: "#eeeeee".to_string(),
+            table_accent: "#dd79ff".to_string(),
         }
     }
 
@@ -153,10 +233,31 @@ impl ChartTheme {
             point_opacity: 0.5,
             line_opacity: 0.5,
             area_opacity: 0.5,
+            title_font_size: 16.0,
+            title_font_weight: "bold".to_string(),
+            title_padding_top: 10.0,
+            title_padding_bottom: 20.0,
+            table_bg: "#2e3440".to_string(),
+            table_border: "#3b4252".to_string(),
+            table_header_bg: "#3b4252".to_string(),
+            table_header_text: "#eceff4".to_string(),
+            table_text: "#d8dee9".to_string(),
+            table_hover: "#434c5e".to_string(),
+            table_selected: "#4c566a".to_string(),
+            table_primary: "#88c0d0".to_string(),
+            table_primary_hover: "#81a1c1".to_string(),
+            table_danger: "#bf616a".to_string(),
+            table_success: "#a3be8c".to_string(),
+            table_muted: "#4c566a".to_string(),
+            table_input_bg: "#2e3440".to_string(),
+            table_input_border: "#434c5e".to_string(),
+            table_input_text: "#eceff4".to_string(),
+            table_accent: "#b48ead".to_string(),
         }
     }
 
     /// Solarized Light theme
+    #[allow(clippy::type_complexity)]
     pub fn solarized_light() -> Self {
         Self {
             background_color: "#fdf6e3".to_string(),
@@ -184,6 +285,26 @@ impl ChartTheme {
             point_opacity: 0.5,
             line_opacity: 0.5,
             area_opacity: 0.5,
+            title_font_size: 16.0,
+            title_font_weight: "bold".to_string(),
+            title_padding_top: 10.0,
+            title_padding_bottom: 20.0,
+            table_bg: "#fdf6e3".to_string(),
+            table_border: "#eee8d5".to_string(),
+            table_header_bg: "#eee8d5".to_string(),
+            table_header_text: "#586e75".to_string(),
+            table_text: "#657b83".to_string(),
+            table_hover: "#fdf6e3".to_string(),
+            table_selected: "#eee8d5".to_string(),
+            table_primary: "#268bd2".to_string(),
+            table_primary_hover: "#2aa198".to_string(),
+            table_danger: "#dc322f".to_string(),
+            table_success: "#859900".to_string(),
+            table_muted: "#93a1a1".to_string(),
+            table_input_bg: "#fdf6e3".to_string(),
+            table_input_border: "#93a1a1".to_string(),
+            table_input_text: "#657b83".to_string(),
+            table_accent: "#d33682".to_string(),
         }
     }
 
@@ -215,6 +336,26 @@ impl ChartTheme {
             point_opacity: 0.5,
             line_opacity: 0.5,
             area_opacity: 0.5,
+            title_font_size: 16.0,
+            title_font_weight: "bold".to_string(),
+            title_padding_top: 10.0,
+            title_padding_bottom: 20.0,
+            table_bg: "#002b36".to_string(),
+            table_border: "#073642".to_string(),
+            table_header_bg: "#073642".to_string(),
+            table_header_text: "#93a1a1".to_string(),
+            table_text: "#839496".to_string(),
+            table_hover: "#002b36".to_string(),
+            table_selected: "#073642".to_string(),
+            table_primary: "#268bd2".to_string(),
+            table_primary_hover: "#2aa198".to_string(),
+            table_danger: "#dc322f".to_string(),
+            table_success: "#859900".to_string(),
+            table_muted: "#586e75".to_string(),
+            table_input_bg: "#002b36".to_string(),
+            table_input_border: "#586e75".to_string(),
+            table_input_text: "#839496".to_string(),
+            table_accent: "#d33682".to_string(),
         }
     }
 
@@ -246,6 +387,26 @@ impl ChartTheme {
             point_opacity: 0.5,
             line_opacity: 0.5,
             area_opacity: 0.5,
+            title_font_size: 18.0,
+            title_font_weight: "bold".to_string(),
+            title_padding_top: 10.0,
+            title_padding_bottom: 20.0,
+            table_bg: "#000000".to_string(),
+            table_border: "#333333".to_string(),
+            table_header_bg: "#111111".to_string(),
+            table_header_text: "#ffffff".to_string(),
+            table_text: "#dddddd".to_string(),
+            table_hover: "#222222".to_string(),
+            table_selected: "#333333".to_string(),
+            table_primary: "#ffff00".to_string(),
+            table_primary_hover: "#cccc00".to_string(),
+            table_danger: "#ff0066".to_string(),
+            table_success: "#00ff00".to_string(),
+            table_muted: "#888888".to_string(),
+            table_input_bg: "#000000".to_string(),
+            table_input_border: "#ffffff".to_string(),
+            table_input_text: "#ffffff".to_string(),
+            table_accent: "#ff00ff".to_string(),
         }
     }
 
@@ -277,6 +438,26 @@ impl ChartTheme {
             point_opacity: 0.5,
             line_opacity: 0.5,
             area_opacity: 0.5,
+            title_font_size: 16.0,
+            title_font_weight: "bold".to_string(),
+            title_padding_top: 10.0,
+            title_padding_bottom: 20.0,
+            table_bg: "#272822".to_string(),
+            table_border: "#3e3d32".to_string(),
+            table_header_bg: "#3e3d32".to_string(),
+            table_header_text: "#f8f8f2".to_string(),
+            table_text: "#e6e6e6".to_string(),
+            table_hover: "#49483e".to_string(),
+            table_selected: "#75715e".to_string(),
+            table_primary: "#66d9ef".to_string(),
+            table_primary_hover: "#9ef0ff".to_string(),
+            table_danger: "#f92672".to_string(),
+            table_success: "#a6e22e".to_string(),
+            table_muted: "#75715e".to_string(),
+            table_input_bg: "#272822".to_string(),
+            table_input_border: "#75715e".to_string(),
+            table_input_text: "#f8f8f2".to_string(),
+            table_accent: "#ae81ff".to_string(),
         }
     }
 

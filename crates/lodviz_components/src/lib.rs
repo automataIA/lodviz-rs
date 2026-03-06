@@ -41,6 +41,8 @@ pub mod components {
     pub mod layout;
     /// Low-level SVG rendering utilities (axes, tooltips, legends)
     pub mod svg;
+    /// Interactive BI-style data table
+    pub mod table;
     /// Global theme management context
     pub mod theme_provider;
 }
@@ -67,3 +69,23 @@ pub use components::layout::draggable_card::DraggableCard;
 pub use components::svg::overlay::{SmaOverlay, TrendLine};
 pub use components::theme_provider::ThemeProvider;
 pub use lodviz_core::core::data::{BarDataset, BarSeries};
+
+// New chart types
+pub use components::charts::chord_chart::ChordChart;
+pub use components::charts::contour_chart::ContourChart;
+pub use components::charts::heatmap::HeatmapChart;
+pub use components::charts::sankey_chart::SankeyChart;
+pub use components::charts::strip_chart::{StripChart, StripLayout};
+
+// New chart types (advanced)
+pub use components::table::data_table::DataTable;
+
+// New data types
+pub use lodviz_core::core::color_map::{ColorMap, DivergingColorMap, SequentialColorMap};
+pub use lodviz_core::core::data::{
+    ChordData, GridData, SankeyData, SankeyLink, SankeyNode, StripGroup,
+};
+// Data table types
+pub use lodviz_core::core::table_data::{
+    Alignment, ColumnDef, ColumnType, ConditionalRule, FilterOp, SortDir, SortKey, TableData,
+};

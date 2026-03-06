@@ -18,6 +18,13 @@ wasm-bindgen = "0.2"
 wasm-bindgen-test = "0.3"
 web-sys = { version = "0.3", features = ["Document", "Window"] }
 
+[profile.dev]
+# Optimized dev profile for faster compilation
+# https://doc.rust-lang.org/cargo/reference/profiles.html#dev
+opt-level = 0
+debug = 1          # Limited debug info (line tables only)
+split-debuginfo = "unpacked"  # Faster builds on Linux
+
 [profile.release]
 opt-level = 'z'
 lto = true

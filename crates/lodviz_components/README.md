@@ -23,6 +23,11 @@ Renders pure SVG — no JavaScript charting library required.
 | `RadarChart` | Multi-axis radar / spider chart |
 | `CandlestickChart` | OHLC financial chart with M4 downsampling |
 | `WaterfallChart` | Running total waterfall |
+| `HeatmapChart` | 2-D grid heatmap with perceptually uniform `ColorMap` and optional `ColorBar` |
+| `StripChart` | Strip / beeswarm plot for categorical group distributions |
+| `SankeyChart` | Flow diagram with proportional nodes and cubic Bézier ribbons |
+| `ChordChart` | Circular chord diagram for symmetric flow matrices |
+| `ContourChart` | Iso-line and filled iso-band visualization via marching squares |
 | `SmartChart` | Facade that selects the renderer from a `ChartSpec` |
 
 ## Interactive Features
@@ -67,8 +72,8 @@ view! {
 
 ```toml
 [dependencies]
-lodviz_components = "0.1"
-lodviz_core = "0.1"
+lodviz_components = "0.2"
+lodviz_core = "0.2"
 ```
 
 Configure your `Trunk.toml` to target WASM:
@@ -115,6 +120,10 @@ types defined in `lodviz_core::core::data`. No parsing happens inside components
 | `CandlestickChart` | `Signal<Vec<OhlcBar>>` |
 | `WaterfallChart` | `Signal<Vec<WaterfallBar>>` |
 | `Histogram`, `BoxPlot`, `ViolinChart` | `Signal<Vec<f64>>` |
+| `HeatmapChart`, `ContourChart` | `Signal<GridData>` |
+| `StripChart` | `Signal<Vec<StripGroup>>` |
+| `SankeyChart` | `Signal<SankeyData>` |
+| `ChordChart` | `Signal<ChordData>` |
 | `SmartChart` | `Signal<ChartSpec>` (generic facade) |
 
 ### From static data
@@ -160,6 +169,32 @@ let dataset = LocalResource::new(|| async {
 
 For the full pipeline (CSV → DataTable → Dataset → downsampling)
 see the **Data Pipeline** section in the [`lodviz_core` README](../lodviz_core).
+
+## Color Maps
+
+`HeatmapChart` and `ContourChart` accept a `color_map: ColorMap` prop for encoding scalar values
+as perceptually uniform colors (Oklab interpolation).
+
+```rust,ignore
+use lodviz_core::core::color_map::{ColorMap, SequentialColorMap, DivergingColorMap};
+
+// Sequential
+<HeatmapChart color_map=ColorMap::Sequential(SequentialColorMap::Viridis) ... />
+<ContourChart color_map=ColorMap::Sequential(SequentialColorMap::Plasma) ... />
+
+// Diverging (good for data centered around zero)
+<HeatmapChart color_map=ColorMap::Diverging(DivergingColorMap::RdBu) ... />
+
+// Custom anchors
+<HeatmapChart color_map=ColorMap::Custom {
+    anchors: vec!["#00429d".into(), "#ffffbf".into(), "#93003a".into()]
+} ... />
+```
+
+Available sequential palettes: `Viridis`, `Plasma`, `Inferno`, `Magma`, `Cividis`, `Turbo`, `Grayscale`.
+Available diverging palettes: `RdBu`, `PuOr`, `PiYG`, `BrBG`.
+
+---
 
 ## Theming
 

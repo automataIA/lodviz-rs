@@ -205,6 +205,93 @@ pub enum DataType {
     Ordinal,
 }
 
+// ---------------------------------------------------------------------------
+// New data types for Heatmap, Strip, Sankey, Chord charts
+// ---------------------------------------------------------------------------
+
+/// A 2-D grid of values (rows × columns), used by HeatmapChart and ContourChart
+#[derive(Debug, Clone, Default)]
+pub struct GridData {
+    /// Row-major matrix of values: `values[row][col]`
+    pub values: Vec<Vec<f64>>,
+    /// Optional labels for each row (Y axis)
+    pub row_labels: Option<Vec<String>>,
+    /// Optional labels for each column (X axis)
+    pub col_labels: Option<Vec<String>>,
+}
+
+impl GridData {
+    /// Minimum value in the grid, or 0.0 if empty
+    pub fn min(&self) -> f64 {
+        self.values
+            .iter()
+            .flatten()
+            .cloned()
+            .fold(f64::INFINITY, f64::min)
+            .clamp(0.0, f64::MAX)
+    }
+
+    /// Maximum value in the grid, or 1.0 if empty
+    pub fn max(&self) -> f64 {
+        self.values
+            .iter()
+            .flatten()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max)
+    }
+}
+
+/// A named group of values for a StripChart
+#[derive(Debug, Clone)]
+pub struct StripGroup {
+    /// Display name for this group (shown on the categorical axis)
+    pub name: String,
+    /// The individual data values within this group
+    pub values: Vec<f64>,
+}
+
+/// A node in a Sankey diagram
+#[derive(Debug, Clone)]
+pub struct SankeyNode {
+    /// Display label for this node
+    pub label: String,
+    /// Optional override color (hex string). If None, uses the palette.
+    pub color: Option<String>,
+}
+
+/// A directional flow link between two Sankey nodes
+#[derive(Debug, Clone)]
+pub struct SankeyLink {
+    /// Index into `SankeyData::nodes` for the source
+    pub source: usize,
+    /// Index into `SankeyData::nodes` for the target
+    pub target: usize,
+    /// Flow magnitude (proportional to ribbon width)
+    pub value: f64,
+    /// Optional override color (hex string). If None, uses source node color.
+    pub color: Option<String>,
+}
+
+/// Complete data for a Sankey flow diagram
+#[derive(Debug, Clone, Default)]
+pub struct SankeyData {
+    /// All nodes in the diagram
+    pub nodes: Vec<SankeyNode>,
+    /// All directed links between nodes
+    pub links: Vec<SankeyLink>,
+}
+
+/// Complete data for a Chord diagram
+#[derive(Debug, Clone, Default)]
+pub struct ChordData {
+    /// Square matrix where `matrix[i][j]` = flow from group i to group j
+    pub matrix: Vec<Vec<f64>>,
+    /// Labels for each group (one per row/column)
+    pub labels: Vec<String>,
+    /// Optional per-group colors (hex strings). If None, uses the palette.
+    pub colors: Option<Vec<String>>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

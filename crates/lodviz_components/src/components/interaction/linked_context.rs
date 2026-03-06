@@ -9,7 +9,7 @@ use lodviz_core::core::selection::Selection;
 ///
 /// Charts publish their hover/selection state here, and
 /// other charts consume it to highlight corresponding data.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct DashboardContext {
     /// Currently hovered x-domain value (shared across charts)
     pub hover_x: RwSignal<Option<f64>>,

@@ -37,6 +37,11 @@ built on [Leptos](https://leptos.dev) 0.8 and compiled to WebAssembly.
 | `RadarChart` | Multi-axis radar / spider chart |
 | `CandlestickChart` | OHLC financial chart with M4 downsampling |
 | `WaterfallChart` | Running total waterfall |
+| `HeatmapChart` | 2-D grid heatmap with perceptually uniform color maps and ColorBar |
+| `StripChart` | Strip / beeswarm plot for categorical distributions |
+| `SankeyChart` | Flow / Sankey diagram with cubic Bézier ribbons |
+| `ChordChart` | Circular chord diagram for symmetric flow matrices |
+| `ContourChart` | Iso-line and filled iso-band visualization via marching squares |
 | `SmartChart` | Facade: picks the right renderer from a declarative `ChartSpec` |
 
 All charts render **pure inline SVG** — no JavaScript charting library, no Canvas.
@@ -155,13 +160,14 @@ lodviz-rs/
 ├── crates/
 │   ├── lodviz_core/          # Pure logic — no UI deps
 │   │   ├── src/
-│   │   │   ├── core/      # data, encoding, scale, mark, theme, a11y, spec
-│   │   │   └── algorithms/ # lttb, m4, statistics, stack, nearest, arc
+│   │   │   ├── core/      # data, encoding, scale, mark, theme, a11y, spec, color_map
+│   │   │   └── algorithms/ # lttb, m4, statistics, stack, nearest, arc,
+│   │   │                  #   beeswarm, sankey_layout, chord_layout, contour
 │   │   └── examples/      # Runnable: lttb.rs, scales.rs, basic_data.rs
 │   └── lodviz_components/    # Chart components
 │       └── src/components/
-│           ├── charts/    # LineChart, BarChart, ScatterChart, …
-│           ├── svg/       # Axis, Grid, Tooltip, Legend, Overlay
+│           ├── charts/    # LineChart, BarChart, ScatterChart, HeatmapChart, …
+│           ├── svg/       # Axis, Grid, Tooltip, Legend, ColorBar, HeatmapTooltip, …
 │           ├── interaction/ # ZoomPan, Brush, LinkedDashboard
 │           └── layout/    # DraggableCard, ChartVisibility, GlobalMouse
 ├── apps/
