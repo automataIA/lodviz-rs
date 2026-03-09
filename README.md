@@ -124,9 +124,9 @@ fn App() -> impl IntoView {
 ### Prerequisites
 
 ```sh
-# Rust nightly + WASM target
-rustup toolchain install nightly
-rustup target add wasm32-unknown-unknown --toolchain nightly
+# Rust stable + WASM target
+rustup toolchain install stable
+rustup target add wasm32-unknown-unknown
 
 # Trunk (WASM bundler)
 cargo install trunk

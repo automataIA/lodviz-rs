@@ -343,7 +343,9 @@ pub fn LineChart(
 
     // Emit our cursor position as domain-X to the shared context
     Effect::new(move |_| {
-        let Some(hover_signal) = dash_hover_x else { return };
+        let Some(hover_signal) = dash_hover_x else {
+            return;
+        };
         let domain_x = cursor_norm.get().map(|(norm_x, _)| {
             let t = zoom_transform.get();
             t.x_min + norm_x * (t.x_max - t.x_min)

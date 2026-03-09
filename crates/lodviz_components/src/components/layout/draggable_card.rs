@@ -157,10 +157,10 @@ pub fn DraggableCard(
     // All captures (signals + u64) are Copy → closure is Copy.
     let on_mouse_down_drag = move |e: MouseEvent| {
         e.prevent_default();
-        set_is_dragging(true);
-        set_drag_start((e.client_x() as f64, e.client_y() as f64));
+        set_is_dragging.set(true);
+        set_drag_start.set((e.client_x() as f64, e.client_y() as f64));
         let t = transform.get();
-        set_initial_pos((t.x, t.y));
+        set_initial_pos.set((t.x, t.y));
         global_mouse.active_card.set(Some(my_id));
     };
 
@@ -168,10 +168,10 @@ pub fn DraggableCard(
     let on_mouse_down_resize = move |e: MouseEvent, handle: ResizeHandle| {
         e.prevent_default();
         e.stop_propagation();
-        set_is_resizing(true);
-        set_resize_handle(Some(handle));
-        set_resize_start((e.client_x() as f64, e.client_y() as f64));
-        set_initial_transform_state(transform.get());
+        set_is_resizing.set(true);
+        set_resize_handle.set(Some(handle));
+        set_resize_start.set((e.client_x() as f64, e.client_y() as f64));
+        set_initial_transform_state.set(transform.get());
         global_mouse.active_card.set(Some(my_id));
     };
 
@@ -242,9 +242,9 @@ pub fn DraggableCard(
     // Reset local drag/resize state when the global active_card is cleared (global mouseup).
     Effect::new(move |_| {
         if global_mouse.active_card.get().is_none() {
-            set_is_dragging(false);
-            set_is_resizing(false);
-            set_resize_handle(None);
+            set_is_dragging.set(false);
+            set_is_resizing.set(false);
+            set_resize_handle.set(None);
         }
     });
 
@@ -268,8 +268,8 @@ pub fn DraggableCard(
                     border_color,
                 )
             }
-            on:mouseenter=move |_| set_is_border_hovered(true)
-            on:mouseleave=move |_| set_is_border_hovered(false)
+            on:mouseenter=move |_| set_is_border_hovered.set(true)
+            on:mouseleave=move |_| set_is_border_hovered.set(false)
         >
             // Borders (invisible/overlay for dragging)
             <div

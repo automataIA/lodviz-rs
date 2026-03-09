@@ -462,7 +462,7 @@ pub fn DataTable(
                                         <p class="font-medium text-gray-600 dark:text-gray-400">
                                             "No results found"
                                         </p>
-                                        <Show when=has_any_filter>
+                                        <Show when=move || has_any_filter.get()>
                                             <button
                                                 class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                                                 on:click=move |_| {

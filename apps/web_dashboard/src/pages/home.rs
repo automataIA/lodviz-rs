@@ -20,21 +20,21 @@ use lodviz_components::components::charts::pie_chart::PieChart;
 use lodviz_components::components::charts::radar::RadarChart;
 use lodviz_components::components::charts::sankey_chart::SankeyChart;
 use lodviz_components::components::charts::scatter_chart::ScatterChart;
+use lodviz_components::components::charts::smart_chart::SmartChart;
 use lodviz_components::components::charts::strip_chart::{StripChart, StripLayout};
 use lodviz_components::components::charts::waterfall::WaterfallChart;
-use lodviz_components::components::layout::chart_visibility::ChartVisibility;
-use lodviz_components::components::charts::smart_chart::SmartChart;
 use lodviz_components::components::interaction::linked_context::LinkedDashboard;
+use lodviz_components::components::layout::chart_visibility::ChartVisibility;
 use lodviz_components::components::layout::draggable_card::{CardTransform, DraggableCard};
 use lodviz_components::components::theme_provider::ThemeProvider;
 use lodviz_core::core::color_map::{ColorMap, SequentialColorMap};
-use lodviz_core::core::encoding::Field;
-use lodviz_core::core::mark::Mark;
-use lodviz_core::core::spec::ChartSpec;
 use lodviz_core::core::data::{
     BarDataset, ChordData, DataPoint, Dataset, GridData, SankeyData, SankeyLink, SankeyNode,
     Series, StripGroup,
 };
+use lodviz_core::core::encoding::Field;
+use lodviz_core::core::mark::Mark;
+use lodviz_core::core::spec::ChartSpec;
 use lodviz_core::core::table_data::{Alignment, ColumnType, TableData};
 use lodviz_core::core::theme::ColorScheme;
 use lodviz_core::core::theme::{ChartConfig, GridStyle};
